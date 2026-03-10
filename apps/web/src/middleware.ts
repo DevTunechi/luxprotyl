@@ -1,65 +1,32 @@
 import { NextResponse, type NextRequest } from 'next/server'
 
-export async function middleware(request: NextRequest) {
-  // If Supabase env vars aren't configured yet, skip middleware entirely
-  if (
-    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  ) {
-    return NextResponse.next()
+// Protected routes — redirect to login if no session cookie found
+const PROTECTED = ['/dashboard', '/properties', '/tenants', '/payments', '/leases']
+
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+
+  // Check if this is a protected route
+  const isProtected = PROTECTED.some(p => pathname.startsWith(p))
+  if (!isProtected) return NextResponse.next()
+
+  // Supabase stores session in sb-*-auth-token cookie
+  // If no cookie exists at all, redirect to login
+  const hasSession = request.cookies.getAll().some(c =>
+    c.name.includes('auth-token') || c.name.includes('sb-')
+  )
+
+  if (!hasSession) {
+    const loginUrl = new URL('/auth/login', request.url)
+    loginUrl.searchParams.set('next', pathname)
+    return NextResponse.redirect(loginUrl)
   }
 
-  try {
-    const { createServerClient } = await import('@supabase/ssr')
-    const response = NextResponse.next({ request })
-
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-      {
-        cookies: {
-          getAll() {
-            return request.cookies.getAll()
-          },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value }) =>
-              request.cookies.set(name, value)
-            )
-            cookiesToSet.forEach(({ name, value, options }) =>
-              response.cookies.set(name, value, options)
-            )
-          },
-        },
-      }
-    )
-
-    // Refresh session
-    const { data: { user } } = await supabase.auth.getUser()
-
-    // Protect dashboard routes
-    const isDashboard = request.nextUrl.pathname.startsWith('/dashboard') ||
-      request.nextUrl.pathname.startsWith('/properties') ||
-      request.nextUrl.pathname.startsWith('/tenants')
-
-    if (isDashboard && !user) {
-      return NextResponse.redirect(new URL('/auth/login', request.url))
-    }
-
-    // Redirect logged-in users away from auth pages
-    const isAuth = request.nextUrl.pathname.startsWith('/auth')
-    if (isAuth && user) {
-      return NextResponse.redirect(new URL('/dashboard', request.url))
-    }
-
-    return response
-  } catch {
-    // Never crash the middleware — just pass through
-    return NextResponse.next()
-  }
+  return NextResponse.next()
 }
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|api|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
