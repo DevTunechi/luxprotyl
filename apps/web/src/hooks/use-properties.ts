@@ -22,7 +22,7 @@ export function useProperties() {
   const [loading, setLoading]       = useState(true)
   const [error, setError]           = useState<string | null>(null)
 
-  const fetch = useCallback(async () => {
+  const fetchProperties = useCallback(async () => {
     setLoading(true)
     try {
       const res  = await fetch('/api/properties')
@@ -36,7 +36,7 @@ export function useProperties() {
     }
   }, [])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { fetchProperties() }, [fetchProperties])
 
-  return { properties, loading, error, refetch: fetch }
+  return { properties, loading, error, refetch: fetchProperties }
 }

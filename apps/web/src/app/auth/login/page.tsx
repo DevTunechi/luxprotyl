@@ -1,10 +1,11 @@
 'use client'
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
 
-export default function LoginPage() {
+// 1. Move the logic into a sub-component
+function LoginForm() {
   const router       = useRouter()
   const searchParams = useSearchParams()
   const next         = searchParams.get('next') || '/dashboard'
@@ -37,16 +38,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div style={{
-      minHeight: '100vh', paddingTop: 64,
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      padding: '80px 20px 40px', background: 'var(--bg-base)',
-      position: 'relative', overflow: 'hidden',
-    }}>
-      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: `radial-gradient(ellipse 60% 50% at 50% 0%, rgba(92,26,40,0.25) 0%, transparent 60%), radial-gradient(ellipse 40% 40% at 80% 80%, rgba(201,148,58,0.06) 0%, transparent 60%)` }} />
-      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', opacity: 0.018, backgroundImage: `repeating-linear-gradient(45deg, rgba(201,148,58,1) 0px, rgba(201,148,58,1) 1px, transparent 1px, transparent 28px), repeating-linear-gradient(-45deg, rgba(201,148,58,1) 0px, rgba(201,148,58,1) 1px, transparent 1px, transparent 28px)` }} />
-
-      <div style={{ position: 'relative', zIndex: 10, width: '100%', maxWidth: 440 }}>
+    <div style={{ position: 'relative', zIndex: 10, width: '100%', maxWidth: 440 }}>
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 52, height: 52, borderRadius: 14, marginBottom: 16, background: 'linear-gradient(135deg, var(--gold), #8A5E18)', boxShadow: '0 8px 24px rgba(201,148,58,0.3)' }}>
             <span style={{ fontSize: 22 }}>🏠</span>
@@ -91,6 +83,26 @@ export default function LoginPage() {
         </div>
         <p style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-muted)', marginTop: 24, lineHeight: 1.6 }}>🔒 Secured by Supabase Auth · NDPR Compliant</p>
       </div>
+  )
+}
+
+// 2. The main page component wraps everything in Suspense
+export default function LoginPage() {
+  return (
+    <div style={{
+      minHeight: '100vh', paddingTop: 64,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      padding: '80px 20px 40px', background: 'var(--bg-base)',
+      position: 'relative', overflow: 'hidden',
+    }}>
+      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: `radial-gradient(ellipse 60% 50% at 50% 0%, rgba(92,26,40,0.25) 0%, transparent 60%), radial-gradient(ellipse 40% 40% at 80% 80%, rgba(201,148,58,0.06) 0%, transparent 60%)` }} />
+      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', opacity: 0.018, backgroundImage: `repeating-linear-gradient(45deg, rgba(201,148,58,1) 0px, rgba(201,148,58,1) 1px, transparent 1px, transparent 28px), repeating-linear-gradient(-45deg, rgba(201,148,58,1) 0px, rgba(201,148,58,1) 1px, transparent 1px, transparent 28px)` }} />
+
+      <Suspense fallback={
+        <div style={{ color: 'var(--gold)', textAlign: 'center' }}>Loading...</div>
+      }>
+        <LoginForm />
+      </Suspense>
     </div>
   )
 }
