@@ -1,8 +1,14 @@
-import axios from 'axios'
+import { createBrowserClient } from '@supabase/ssr'
 
-const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1',
-  headers: { 'Content-Type': 'application/json' },
-})
+let _client: ReturnType<typeof createBrowserClient> | null = null
 
-export default api
+export function getSupabaseBrowser() {
+  if (typeof window === 'undefined') return null
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (!url || !key) return null
+  if (!_client) {
+    _client = createBrowserClient(url, key)
+  }
+  return _client
+}
