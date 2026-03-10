@@ -1,3 +1,10 @@
+#!/bin/bash
+cd ~/Desktop/luxprotyl || { echo "❌ Wrong directory"; exit 1; }
+if [ ! -d "apps/web" ]; then echo "❌ Run from repo root"; exit 1; fi
+
+WEB="apps/web/src"
+
+cat > $WEB/app/auth/login/page.tsx << 'EOF'
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
@@ -132,3 +139,8 @@ export default function LoginPage() {
     </div>
   )
 }
+EOF
+
+echo "✅ login/page.tsx — uses window.location.href for hard redirect"
+echo ""
+echo "git add -A && git commit -m 'fix: login redirect — window.location.href ensures session cookie is set' && git push"
