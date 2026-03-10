@@ -76,7 +76,7 @@ export default function LoginForm() {
               <input id="password" name="password" type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required autoComplete="current-password" className="lux-input" />
             </div>
             <div style={{ textAlign:'right', marginBottom:22 }}>
-              <Link href="/auth/reset" style={{ fontSize:12, color:'var(--gold)', textDecoration:'none' }}>Forgot password?</Link>
+              <Link href="#" style={{ fontSize:12, color:'var(--gold)', textDecoration:'none' }}>Forgot password?</Link>
             </div>
             <button type="submit" disabled={loading} className="btn-gold" style={{ width:'100%', padding:14, fontSize:15, opacity:loading?0.7:1 }}>
               {loading ? (
