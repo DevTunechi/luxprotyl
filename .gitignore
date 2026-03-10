@@ -5,3 +5,7 @@ dist
 .env.local
 *.log
 .turbo
+apps/api/.env
+**/.env
+**/.env.local
+**/.env.production
