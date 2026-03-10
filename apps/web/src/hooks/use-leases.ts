@@ -1,6 +1,11 @@
 'use client'
 import { useEffect, useState, useCallback } from 'react'
 
+export type LeaseProperty = {
+  name: string
+  address: string
+}
+
 export type Lease = {
   id: string
   property_id: string
@@ -12,8 +17,8 @@ export type Lease = {
   status: 'active' | 'expired' | 'terminated' | 'pending'
   invite_token?: string
   tenant_name?: string
-  property_name?: string
   days_until_expiry?: number
+  properties?: LeaseProperty | null
   created_at: string
 }
 
